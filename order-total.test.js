@@ -2,11 +2,12 @@ const orderTotal = require("./order-total");
 const config = require("./config");
 
 it("should call vatsense api ", () => {
-  let isFakeFetch = false;
-
-  let fakeFetch = (url) => {
+  const fakeFetch = (url, opts) => {
     expect(url).toBe("https://api.vatsense.com/1.0/rates?country_code=DE");
-    isFakeFetch = true;
+    expect(opts.headers.Authorization).toBe(
+      "Basic " + Buffer.from(config.VAT_API_KEY).toString("base64")
+    );
+
     return Promise.resolve({
       json: () =>
         Promise.resolve({
@@ -19,14 +20,34 @@ it("should call vatsense api ", () => {
     });
   };
 
+  const fakeFetch2 = jest.fn().mockReturnValue(
+    Promise.resolve({
+      json: () =>
+        Promise.resolve({
+          data: {
+            standard: {
+              rate: 19,
+            },
+          },
+        }),
+    })
+  );
+
   const order = {
     country: "DE",
     items: [{ name: "Dragon barbershop comb", price: 999, quantity: 3 }],
   };
 
-  return orderTotal(fakeFetch, config, order).then((result) => {
+  return orderTotal(fakeFetch2, config, order).then((result) => {
     expect(result).toBe(999 * 3 * 1.19);
-    expect(isFakeFetch).toBe(true);
+    expect(
+      fakeFetch2
+    ).toBeCalledWith("https://api.vatsense.com/1.0/rates?country_code=DE", {
+      headers: {
+        Authorization:
+          "Basic dXNlcjoxZmQ2ZmQwMWI5M2Y5MmRlOGYwYjQ2MzMzNDI4NjkzMw==",
+      },
+    });
   });
 });
 
