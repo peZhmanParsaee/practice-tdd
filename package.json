@@ -1,0 +1,15 @@
+{
+  "name": "fun-fun-function",
+  "scripts": {
+    "start": "node sandbox.js",
+    "test": "jest",
+    "watch": "jest --watch *.js"
+  },
+  "devDependencies": {
+    "jest": "^26.4.2"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "node-fetch": "^2.6.1"
+  }
+}
